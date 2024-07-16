@@ -35,17 +35,23 @@ To the right of the strikes is Call Put GEX individually
 bot = commands.Bot(command_prefix='}', intents=discord.Intents.all(), help_command=MyNewHelp(), sync_commands=True)
 
 @bot.event
-async def on_ready():
-	pass
-	
-@bot.event
 async def on_message(message):
 	print( f'Message Event?!?!? {message}' )
 	
-@tasks.loop(seconds=30)
-async def your_loop():
-	pass
+StoredIntr = []
 
+@tasks.loop(seconds=10)
+async def your_loop():
+	for intr in StoredIntr :
+		#intr = 'app_permissions', 'application_id', 'channel', 'channel_id', 'client', 'command', 'command_failed', 'context', 'created_at', 'data', 'delete_original_response', 'edit_original_response', 'entitlement_sku_ids', 'entitlements', 'expires_at', 'extras', 'followup', 'guild', 'guild_id', 'guild_locale', 'id', 'is_expired', 'is_guild_integration', 'is_user_integration', 'locale', 'message', 'namespace', 'original_response', 'permissions', 'response', 'token', 'translate', 'type', 'user', 'version'
+		#await intr.edit_original_response(f'This worked??')
+		message = await intr.original_response()
+		await message.edit(content="new message :D")
+
+@bot.event
+async def on_ready():
+	your_loop.start()
+	
 class AddUserButton(ui.Button):
 	def __init__(self):
 		super().__init__(label="Add Me!", style=discord.ButtonStyle.green)
@@ -70,6 +76,7 @@ async def slash_command_farm(intr: discord.Interaction):
 	#do stuff
 	#await intr.response.send_message(response)
 	await intr.followup.send(f'{perms[0]} is farming stuff', view=view)
+	StoredIntr.append( intr )
 #	await intr.message.add_reaction("🤩")
 	
 def getToday():
