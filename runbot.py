@@ -9,13 +9,13 @@ from discord.ext import tasks
 import discord
 from discord.ext import commands
 from discord import app_commands
+from discord import ui
 import requests
 import os
 
 init = json.load(open('apikey.json'))
 BOT_TOKEN = init['APP_TOKEN']
 BOT_APP_ID = init['APP_ID']
-
 
 class MyNewHelp(commands.MinimalHelpCommand):
 	async def send_pages(self):
@@ -34,15 +34,43 @@ To the right of the strikes is Call Put GEX individually
 			await destination.send(strHelp)
 bot = commands.Bot(command_prefix='}', intents=discord.Intents.all(), help_command=MyNewHelp(), sync_commands=True)
 
+@bot.event
+async def on_ready():
+	pass
+	
+@bot.event
+async def on_message(message):
+	print( f'Message Event?!?!? {message}' )
+	
+@tasks.loop(seconds=30)
+async def your_loop():
+	pass
+
+class AddUserButton(ui.Button):
+	def __init__(self):
+		super().__init__(label="Add Me!", style=discord.ButtonStyle.green)
+
+	async def callback(self, intr: discord.Interaction):
+		# Get the role you want to add the user to
+		#role_id = 1234567890  # Replace with the actual role ID
+		#role = intr.guild.get_role(role_id)
+
+		await intr.response.send_message(f"{intr.user.global_name} you've clicked my button")#, ephemeral=True)
+
+
 @bot.tree.command(name="farm", description="Answers your question?")
 async def slash_command_farm(intr: discord.Interaction):
 	perms = await checkInteractionPermissions( intr )
-	await intr.response.defer(thinking=True, ephemeral=perms[3]==False)	
+	await intr.response.defer(thinking=True)#, ephemeral=perms[3]==False)	
 	
-	
+	#print( val )
+	view = ui.View()
+	view.add_item(AddUserButton())
+
 	#do stuff
 	#await intr.response.send_message(response)
-	await intr.followup.send(f'{perms[0]} is farming stuff')
+	await intr.followup.send(f'{perms[0]} is farming stuff', view=view)
+#	await intr.message.add_reaction("🤩")
 	
 def getToday():
 	dateAndtime = str(datetime.datetime.now()).split(" ")
