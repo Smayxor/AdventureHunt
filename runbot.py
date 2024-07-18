@@ -12,6 +12,7 @@ from discord import app_commands
 from discord import ui
 import requests
 import os
+from typing import Union
 
 init = json.load(open('apikey.json'))
 BOT_TOKEN = init['APP_TOKEN']
@@ -35,7 +36,7 @@ To the right of the strikes is Call Put GEX individually
 bot = commands.Bot(command_prefix='}', intents=discord.Intents.all(), help_command=MyNewHelp(), sync_commands=True)
 
 @bot.event
-async def on_message(message):
+async def on_message(message):  #Triggered during interactions
 	print( f'Message Event?!?!? {message}' )
 	
 StoredIntr = []
@@ -43,10 +44,11 @@ StoredIntr = []
 @tasks.loop(seconds=10)
 async def your_loop():
 	for intr in StoredIntr :
-		#intr = 'app_permissions', 'application_id', 'channel', 'channel_id', 'client', 'command', 'command_failed', 'context', 'created_at', 'data', 'delete_original_response', 'edit_original_response', 'entitlement_sku_ids', 'entitlements', 'expires_at', 'extras', 'followup', 'guild', 'guild_id', 'guild_locale', 'id', 'is_expired', 'is_guild_integration', 'is_user_integration', 'locale', 'message', 'namespace', 'original_response', 'permissions', 'response', 'token', 'translate', 'type', 'user', 'version'
-		#await intr.edit_original_response(f'This worked??')
+
 		message = await intr.original_response()
-		await message.edit(content="new message :D")
+		
+		await message.edit(content=f'{intr.created_at}')
+
 
 @bot.event
 async def on_ready():
@@ -54,16 +56,31 @@ async def on_ready():
 	
 class AddUserButton(ui.Button):
 	def __init__(self):
-		super().__init__(label="Add Me!", style=discord.ButtonStyle.green)
+		super().__init__(label="Buy Call!", style=discord.ButtonStyle.green)
 
 	async def callback(self, intr: discord.Interaction):
 		# Get the role you want to add the user to
 		#role_id = 1234567890  # Replace with the actual role ID
 		#role = intr.guild.get_role(role_id)
 
-		await intr.response.send_message(f"{intr.user.global_name} you've clicked my button")#, ephemeral=True)
+		await intr.response.send_message(f"{intr.user.global_name} bought a call")#, ephemeral=True)
 
+class AddUserButton2(ui.Button):
+	def __init__(self):
+		super().__init__(label="Buy Put!", style=discord.ButtonStyle.green)
 
+	async def callback(self, intr: discord.Interaction):
+		# Get the role you want to add the user to
+		#role_id = 1234567890  # Replace with the actual role ID
+		#role = intr.guild.get_role(role_id)
+
+		await intr.response.send_message(f"{intr.user.global_name} bought a put")#, ephemeral=True)
+
+SERVER_IP = "http://192.168.1.254:8080" #init.get('SERVER_IP', 'http://127.0.0.1:8080')
+def grabLastData():
+	urlLast = f'{SERVER_IP}/last-datalog.json'
+	tmp = requests.get(urlLast).json()
+	
 @bot.tree.command(name="farm", description="Answers your question?")
 async def slash_command_farm(intr: discord.Interaction):
 	perms = await checkInteractionPermissions( intr )
@@ -72,13 +89,26 @@ async def slash_command_farm(intr: discord.Interaction):
 	#print( val )
 	view = ui.View()
 	view.add_item(AddUserButton())
+	view.add_item(AddUserButton2())
 
 	#do stuff
 	#await intr.response.send_message(response)
-	await intr.followup.send(f'{perms[0]} is farming stuff', view=view)
+	await intr.followup.send(f'{perms[0]} is buying options.', view=view)
 	StoredIntr.append( intr )
 #	await intr.message.add_reaction("🤩")
-	
+
+@bot.tree.context_menu(name='test2')
+async def test2(intr: discord.Interaction, user: Union[discord.Member, discord.User] ):
+	print( user )
+
+@bot.tree.context_menu(name='test3')
+async def test3(intr: discord.Interaction, msg: discord.Message):
+	txt = ""
+	for t in msg.embeds :
+		txt = f'```{t.title}{t.description}{t.fields}```'
+		
+	await intr.response.send_message(txt)#, ephemeral=True)
+
 def getToday():
 	dateAndtime = str(datetime.datetime.now()).split(" ")
 	tmp = dateAndtime[1].split(".")[0].split(":")

@@ -48,6 +48,15 @@ try :
 	"""
 	slash_command_json = { "name": "farm", "type": 1, "integration_types": [0, 1], "contexts": [0,1,2], "description": "Farm items from server" }
 	print( requests.post(url, headers=headers, json=slash_command_json) )
+
+	slash_command_json = { "name": "test2", "type": 2, "integration_types": [0, 1], "contexts": [0,1,2] }
+	response = requests.post(url, headers=headers, json=slash_command_json)
+	print( response.status_code )
+	print(  response.content )
+	#b'{"id":"XXXXXXXXXXXXXXX","application_id":"XXXXXXXXXXXXXX","version":"1263224564025131211","default_member_permissions":null,"type":2,"name":"test2","name_localizations":null,"description":"","description_localizations":null,"dm_permission":true,"contexts":[0,1,2],"integration_types":[0,1],"nsfw":false}\n'
+
+	slash_command_json = { "name": "test3", "type": 3, "integration_types": [0, 1], "contexts": [0,1,2] }
+	print( requests.post(url, headers=headers, json=slash_command_json) )
 	
 except Exception as er:
 	print(f'SlashCommand Error - {er}')
