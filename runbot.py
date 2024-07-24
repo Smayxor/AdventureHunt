@@ -37,7 +37,8 @@ bot = commands.Bot(command_prefix='}', intents=discord.Intents.all(), help_comma
 
 @bot.event
 async def on_message(message):  #Triggered during interactions
-	print( f'Message Event?!?!? {message}' )
+	#print( f'Message Event?!?!? {message}' )
+	pass
 	
 StoredIntr = []
 
@@ -99,14 +100,45 @@ async def slash_command_farm(intr: discord.Interaction):
 
 @bot.tree.context_menu(name='test2')
 async def test2(intr: discord.Interaction, user: Union[discord.Member, discord.User] ):
-	print( user )
+	DEV_LIST = (208903205982044161, 154497072148643840, 218773382617890828)
+	user = bot.get_user(DEV_LIST[0])
+	print( user.name )
+	await intr.response.send_message( user.name )
 
 @bot.tree.context_menu(name='test3')
 async def test3(intr: discord.Interaction, msg: discord.Message):
+	
+	monsters = json.load(open('as_monsters.json'))
+	attribs = json.load(open('attribs.json'))	
+
+	prefix = "This monster is **a"
 	txt = ""
 	for t in msg.embeds :
-		txt = f'```{t.title}{t.description}{t.fields}```'
+		#txt = f'```fix\n{t.description}```'
+		tmp = t.description
+		if prefix in tmp :
+			#tmp = tmp.split(prefix)[1]
 		
+			for attr in attribs :
+				#print( attr )
+				if attr in tmp :
+					#print( attr, attribs[attr] )
+					a = attribs[attr]
+					txt += f'HP {a[0]} TP {a[1]}'
+					break
+					
+			for mons in monsters :
+				if mons in tmp :
+					print( f'Found { mons}' )
+					monster = monsters[mons]
+					txt += f'HP:{monster['hp']}/TP:{monster['dipl']} - pdef:{monster['pdef']} mdef:{monster['mdef']}'
+					break
+		
+	
+	#This monster is **a disgusting Ascended Orc Slavedriver**.
+	#Swords slice through this monster like a **hot knife through butter!**
+	#Magic spells are **hugely effective** against this monster!
+
 	await intr.response.send_message(txt)#, ephemeral=True)
 
 def getToday():
