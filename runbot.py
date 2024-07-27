@@ -135,21 +135,11 @@ async def test3(intr: discord.Interaction, msg: discord.Message):
 				a = attribs[attr]
 				txt += f'{attr} - HP {a[0]} TP {a[1]}'
 			
-		monster = None
-		for mons in monsters :
-			word1 = words[-1] in mons
-			word2 = (words[-2] in mons) if len(words) > 2 else True
-			if word1 and word2 :
+		for mons in monsters : #Search by image is easier to figure out then search by X word(s) in a string
+			if monsterImage in monsters[mons]["image"] :
 				print( f'Found { mons}' )
 				monster = monsters[mons]
-				txt += f'\n{mons} HP:{monster['hp']} / TP:{monster['dipl']} - pdef:{monster['pdef']} mdef:{monster['mdef']}'
-
-		if monster is None :
-			for mons in monsters :
-				if monsterImage in monsters[mons]["image"] :
-					print( f'Found { mons}' )
-					monster = monsters[mons]
-					txt += f'\n{mons} HP:{monster['hp']} / TP:{monster['dipl']} - pdef:{monster['pdef']} mdef:{monster['mdef']}'
+				txt += f'\n{mons} HP : {monster['hp']} / TP : {monster['dipl']} - Pdef : {monster['pdef']} Mdef : {monster['mdef']}'
 
 	await intr.response.send_message(txtDesc + txt)#, ephemeral=True)
 
