@@ -122,14 +122,16 @@ async def test3(intr: discord.Interaction, msg: discord.Message):
 		monsterImage = t.thumbnail.url
 		
 		
-		txtDesc = f'```fix\n{t.description}```\n'
+		txtDesc = f'```fix\n{t.description}```\n'.replace("  ",  "*** Transcended ***" )
+		
 		tmp = t.description.split("**")[1]
 		
 		q = tmp.split(" ")
 		words = []
 		for l in q :
 			if len(l) > 2 : words.append(l)
-			
+		
+		a = None
 		for attr in attribs :
 			if words[0] in attr:
 				a = attribs[attr]
@@ -137,9 +139,17 @@ async def test3(intr: discord.Interaction, msg: discord.Message):
 			
 		for mons in monsters : #Search by image is easier to figure out then search by X word(s) in a string
 			if monsterImage in monsters[mons]["image"] :
-				print( f'Found { mons}' )
+				#print( f'Found { mons}' )
 				monster = monsters[mons]
-				txt += f'\n{mons} HP : {monster['hp']} / TP : {monster['dipl']} - Pdef : {monster['pdef']} Mdef : {monster['mdef']}'
+				hp = monster['hp']
+				tp = monster['dipl']
+				
+				pd = monster['pdef']
+				md = monster['mdef']
+				if not a is None :
+					hp *= a[0]
+					tp *= a[1]
+				txt += f'\n{mons} HP : {hp} / TP : {tp} - Pdef : {pd} Mdef : {md}'
 
 	await intr.response.send_message(txtDesc + txt)#, ephemeral=True)
 
