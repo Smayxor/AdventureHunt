@@ -105,41 +105,53 @@ async def test2(intr: discord.Interaction, user: Union[discord.Member, discord.U
 	print( user.name )
 	await intr.response.send_message( user.name )
 
+
+monsters = json.load(open('as_monsters.json'))
+attribs = json.load(open('attribs.json'))	
 @bot.tree.context_menu(name='test3')
 async def test3(intr: discord.Interaction, msg: discord.Message):
-	
-	monsters = json.load(open('as_monsters.json'))
-	attribs = json.load(open('attribs.json'))	
+	global monsters, attribs
 
 	prefix = "This monster is **a"
 	txt = ""
+	txtDesc = ""
 	for t in msg.embeds :
-		#txt = f'```fix\n{t.description}```'
-		tmp = t.description
-		if prefix in tmp :
-			#tmp = tmp.split(prefix)[1]
 		
-			for attr in attribs :
-				#print( attr )
-				if attr in tmp :
-					#print( attr, attribs[attr] )
-					a = attribs[attr]
-					txt += f'HP {a[0]} TP {a[1]}'
-					break
-					
+		#'author', 'clear_fields', 'color', 'colour', 'copy', 'description', 'fields', 'footer', 'from_dict', 'image', 'insert_field_at', 'provider', 'remove_author', 'remove_field', 'remove_footer', 'set_author', 'set_field_at', 'set_footer', 'set_image', 'set_thumbnail', 'thumbnail', 'timestamp', 'title', 'to_dict', 'type', 'url', 'video'
+		#EmbedProxy(width=960, url='https://cdn.pixabay.com/photo/2013/10/27/14/17/demon-201422_960_720.jpg', proxy_url='https://images-ext-1.discordapp.net/external/uyIbR0GYjCNSIEEjRGYw_ZcsmfMQuJAMJQ8wlAAKGcM/https/cdn.pixabay.com/photo/2013/10/27/14/17/demon-201422_960_720.jpg', height=640)
+		monsterImage = t.thumbnail.url
+		
+		
+		txtDesc = f'```fix\n{t.description}```\n'
+		tmp = t.description.split("**")[1]
+		
+		q = tmp.split(" ")
+		words = []
+		for l in q :
+			if len(l) > 2 : words.append(l)
+			
+		for attr in attribs :
+			if words[0] in attr:
+				a = attribs[attr]
+				txt += f'{attr} - HP {a[0]} TP {a[1]}'
+			
+		monster = None
+		for mons in monsters :
+			word1 = words[-1] in mons
+			word2 = (words[-2] in mons) if len(words) > 2 else True
+			if word1 and word2 :
+				print( f'Found { mons}' )
+				monster = monsters[mons]
+				txt += f'\n{mons} HP:{monster['hp']} / TP:{monster['dipl']} - pdef:{monster['pdef']} mdef:{monster['mdef']}'
+
+		if monster is None :
 			for mons in monsters :
-				if mons in tmp :
+				if monsterImage in monsters[mons]["image"] :
 					print( f'Found { mons}' )
 					monster = monsters[mons]
-					txt += f'HP:{monster['hp']}/TP:{monster['dipl']} - pdef:{monster['pdef']} mdef:{monster['mdef']}'
-					break
-		
-	
-	#This monster is **a disgusting Ascended Orc Slavedriver**.
-	#Swords slice through this monster like a **hot knife through butter!**
-	#Magic spells are **hugely effective** against this monster!
+					txt += f'\n{mons} HP:{monster['hp']} / TP:{monster['dipl']} - pdef:{monster['pdef']} mdef:{monster['mdef']}'
 
-	await intr.response.send_message(txt)#, ephemeral=True)
+	await intr.response.send_message(txtDesc + txt)#, ephemeral=True)
 
 def getToday():
 	dateAndtime = str(datetime.datetime.now()).split(" ")
